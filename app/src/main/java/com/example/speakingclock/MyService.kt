@@ -9,19 +9,24 @@ import android.util.Log
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class MyService : Service(), TextToSpeech.OnInitListener {
+@Suppress("DEPRECATION")
+class MyService : Service() {
 
     private lateinit var tts: TextToSpeech
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.i("check","onStartCommand")
+        Log.i("this services ", "Service started")
         val currentTime:String= getCurrentTime()
-        speak(currentTime)
-        return START_STICKY
-    }
+        tts = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                val result = tts.setLanguage(Locale.getDefault())
+                if (result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED) {
+                    tts.speak(currentTime, TextToSpeech.QUEUE_FLUSH, null)
+                }
 
-    private fun speak( currentTime:String) {
-        tts.speak(currentTime,TextToSpeech.QUEUE_FLUSH,null,"")
+            }
+        }
+        return START_STICKY
     }
 
     private fun getCurrentTime(): String {
@@ -37,15 +42,8 @@ class MyService : Service(), TextToSpeech.OnInitListener {
 
     override fun onCreate() {
         super.onCreate()
-        Log.i("check","onCreate")
-        tts=TextToSpeech(this,this)
-        tts.setLanguage(Locale.getDefault())
-        val currentTime:String= getCurrentTime()
-        speak(currentTime)
+        Log.i("this services", "Service created")
     }
 
-    override fun onInit(p0: Int) {
-
-    }
 
 }
